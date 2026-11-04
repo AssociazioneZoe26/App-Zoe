@@ -19,6 +19,19 @@ export type Activity = {
   image?: string;
   accent: "blue" | "yellow" | "teal" | "pink";
   teacher?: string;
+  /** Presente nei corsi online creati da admin: URL del video corso completo */
+  courseVideoUrl?: string;
+  fullText?: string;
+  /** Durata complessiva del corso */
+  courseDuration?: string;
+  /** Costo pacchetto 5 ingressi (€) */
+  pricePack5?: number;
+  /** Costo pacchetto 10 ingressi (€) */
+  pricePack10?: number;
+  /** Canone mensile rinnovabile area socio (€) */
+  priceMonthly?: number;
+  /** Costo del corso intero (€) */
+  priceCourse?: number;
 };
 
 export const activities: Activity[] = [
@@ -50,7 +63,7 @@ export const activities: Activity[] = [
   },
   {
     slug: "laboratori-lego",
-    title: "Laboratori LEGO",
+    title: "Laboratori LEGO 5–12 anni",
     eyebrow: "Costruzioni",
     age: "5–12 anni",
     category: "Laboratorio",
@@ -69,6 +82,11 @@ export const activities: Activity[] = [
     phoneLabel: "347 3814081",
     image: "/corsi/laboratori-lego.jpg",
     accent: "yellow",
+    courseDuration: "Anno scolastico",
+    pricePack5: 50,
+    pricePack10: 90,
+    priceMonthly: 100,
+    priceCourse: 280,
   },
   {
     slug: "laboratori-robotica",

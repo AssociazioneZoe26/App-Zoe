@@ -11,6 +11,17 @@ export type ContentVideo = {
   poster?: string;
 };
 
+export type HomePreview = {
+  title: string;
+  body: string;
+  to: string;
+  cta: string;
+  image?: string;
+  imageAlt?: string;
+  imagePosition?: "top" | "center" | "bottom";
+  imageFit?: "cover" | "natural";
+};
+
 export type SitePage = {
   slug: string;
   title: string;
@@ -18,8 +29,11 @@ export type SitePage = {
   heroTitle: string;
   heroText: string;
   heroImage: string;
+  /** Allinea la foto hero (es. top per non tagliare i volti). */
+  heroImagePosition?: "top" | "center" | "bottom";
   sections: ContentSection[];
   videos: ContentVideo[];
+  previews?: HomePreview[];
 };
 
 export const sitePages: Record<string, SitePage> = {
@@ -30,39 +44,74 @@ export const sitePages: Record<string, SitePage> = {
     heroTitle: "Costruisci. Immagina. Impara.",
     heroText:
       "Associazione no profit a Li Punti, Sassari. Educazione, arte, robotica, tempo libero e progetti per bambini e adulti.",
-    heroImage: "/hero/laboratorio.jpg",
-    sections: [
+    heroImage: "/site/home-hero.jpg",
+    sections: [],
+    videos: [],
+    previews: [
       {
-        title: "Benvenuti in Zoe",
-        body: "Zoe significa nuova vita. Qui trovi i corsi e i laboratori di Zoe Academy, la squadra di robotica, i progetti con scuole e comuni e le gite. I contenuti di questa pagina si aggiornano dall’area admin.",
-        image: "/hero/laboratorio-2.jpg",
-        imageAlt: "Bambini impegnati in un laboratorio",
+        title: "Chi siamo",
+        body: "Zoe è un’associazione no profit. Si dedica a migliorare la qualità della vita dei soci, dai bambini agli adulti, senza limiti d’età: nel tempo libero, con il gioco e con attività ludiche ed educative.\n\nOgni persona ha talenti e risorse da far emergere, per il lavoro, la famiglia, le relazioni e la comunità. In sede i corsi e i laboratori fanno sperimentare logica, creatività, manualità e pensiero computazionale.",
+        to: "/chi-siamo",
+        cta: "Scopri Chi siamo",
+        image: "/site/chi-siamo.jpg",
+        imageAlt: "Team Zoe Sassari con il premio Coach/Mentore FIRST LEGO League",
+        imagePosition: "top",
       },
       {
         title: "Zoe Academy",
-        body: "Nell’area Academy trovi le attività in corso: robotica e LEGO, coding e droni, informatica, inglese e LIS. Scegli un’attività e scrivi a Zoe su WhatsApp. L’iscrizione resta in associazione.",
+        body: "L’offerta formativa in sede e online: LEGO Robotica, Laboratori LEGO, Laboratori di robotica, Coding e droni, Informatica, inglese, Avvicinamento alla LIS, pittura e percorsi STEM. Corsi, laboratori e workshop per bambini, ragazzi e adulti.",
+        to: "/academy",
+        cta: "Vai a Zoe Academy",
+        image: "/site/zoe-academy.jpg",
+        imageAlt: "Emblema Zoe Academy",
+        imageFit: "natural",
+      },
+      {
+        title: "Squadra Robotica",
+        body: "Testo placeholder. Qui presenteremo la squadra, gli allenamenti e le gare di robotica.",
+        to: "/squadra-robotica",
+        cta: "Scopri la Squadra",
+        image: "/site/squadra-robotica.jpg",
+        imageAlt: "Team Zoe Sassari, squadra di robotica",
+        imagePosition: "top",
+      },
+      {
+        title: "Progetti",
+        body: "Sei una scuola della Sardegna? Un comune che vuole organizzare corsi o attività? Zoe collabora con le scuole e i comuni sul territorio e organizza gite e uscite formative. Percorsi educativi, iniziative condivise e esperienze fuori sede per bambini, ragazzi e comunità.",
+        to: "/progetti/scuole",
+        cta: "Vedi i progetti",
+        image: "/site/progetti.jpg",
+        imageAlt: "Ragazzi con un robot durante un progetto Zoe",
+        imageFit: "natural",
+      },
+      {
+        title: "Carta docente",
+        body: "Bonus da 500 euro del Ministero dell’Istruzione per i docenti di ruolo: aggiornamento professionale, anche digitale. Si può spendere presso esercenti ed enti di formazione fisici e online — libri e device informatici, anche su Amazon. Con Zoe per corsi e formazione STEM a Li Punti.",
+        to: "/carta-docente",
+        cta: "Scopri di più",
+        image: "/site/carta-docente.jpg",
+        imageAlt: "Carta del Docente · Formazione e crescita con Zoe",
+        imageFit: "natural",
       },
     ],
-    videos: [],
   },
   "chi-siamo": {
     slug: "chi-siamo",
     title: "Chi siamo",
     documentTitle: "Chi siamo · Zoe",
-    heroTitle: "Zoe significa nuova vita.",
+    heroTitle: "Zoe significa\nnuova vita.",
     heroText:
-      "Un’associazione no profit che migliora la qualità della vita dei soci, dai bambini agli adulti, con gioco, educazione e solidarietà.",
-    heroImage: "/hero/laboratorio-2.jpg",
+      "Zoe è un’associazione no profit. Si dedica a migliorare la qualità della vita dei soci, dai bambini agli adulti, senza limiti d’età: nel tempo libero, con il gioco e con attività ludiche ed educative.",
+    heroImage: "/site/chi-siamo.jpg",
+    heroImagePosition: "top",
     sections: [
       {
         title: "Talenti e crescita",
-        body: "Ogni persona ha talenti e risorse da far emergere, per il lavoro, la famiglia, le relazioni e la comunità. In sede i corsi e i laboratori fanno sperimentare logica, creatività, manualità e pensiero computazionale.",
-        image: "/corsi/academy-panorama.jpg",
-        imageAlt: "Attività in sede a Zoe",
+        body: "Ogni persona ha talenti e risorse da far emergere, per il lavoro, la famiglia, le relazioni e la comunità. In sede i corsi e i laboratori fanno sperimentare logica, creatività, manualità e pensiero computazionale. Oggi ci sono robotica e LEGO, coding e droni, informatica, inglese e pittura. Online, l’avvicinamento alla LIS è aperto a tutte le età.",
       },
       {
         title: "Solidarietà",
-        body: "Durante l’anno ogni socio può seguire corsi, laboratori ed eventi a Li Punti. La quota inclusa nella tessera sostiene i progetti sociali e aiuta la comunità contro isolamento e solitudine. L’iscrizione resta in associazione.",
+        body: "Durante l’anno ogni socio può seguire corsi, laboratori ed eventi a Li Punti. Zoe crede nella solidarietà: la quota inclusa nella tessera sostiene i progetti sociali e aiuta la comunità contro isolamento e solitudine. L’iscrizione resta in associazione.",
       },
     ],
     videos: [],

@@ -1,15 +1,30 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { getCatalogActivities } from "../admin/productToActivity";
 import { Layout } from "../components/Layout";
 import {
-  activities,
   activityFilters,
-  activityWhatsapp,
   deskPhone,
   generalWhatsapp,
   type Activity,
   type FilterId,
 } from "../data";
+import { useMemberAuth } from "../member/MemberAuthContext";
+
+function formatEuro(value: number) {
+  return new Intl.NumberFormat("it-IT", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function packPriceFrom(activity: Activity) {
+  const packs = [activity.pricePack5, activity.pricePack10].filter(
+    (value): value is number => typeof value === "number",
+  );
+  return packs.length ? Math.min(...packs) : null;
+}
 
 function isFilter(value: string | null): value is FilterId {
   return activityFilters.some((item) => item.id === value);
@@ -26,12 +41,20 @@ function matches(activity: Activity, filter: FilterId) {
 export function Catalog() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { session, ready } = useMemberAuth();
+  // Solo soci loggati vedono i CTA acquisto; finché auth non è pronto, resta "Scopri di più".
+  const isMember = ready && Boolean(session);
   const requested = params.get("tipo");
   const filter: FilterId = isFilter(requested) ? requested : "tutte";
+  const [activities, setActivities] = useState<Activity[]>(() => getCatalogActivities());
   const visible = useMemo(
     () => activities.filter((activity) => matches(activity, filter)),
-    [filter],
+    [activities, filter],
   );
+
+  useEffect(() => {
+    setActivities(getCatalogActivities());
+  }, []);
 
   function setFilter(id: FilterId) {
     navigate(
@@ -120,46 +143,43 @@ export function Catalog() {
                   >
                     <CourseArt activity={activity} />
                   </Link>
-                  <a
-                    className="btn"
-                    href={activityWhatsapp(activity)}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={`Scopri di più su ${activity.title}`}
-                  >
-                    Scopri di più
-                  </a>
+                  {isMember &&
+                  (packPriceFrom(activity) != null ||
+                    activity.priceMonthly != null ||
+                    activity.priceCourse != null) ? (
+                    <Link
+                      className="btn btn-buy-options"
+                      to={`/attivita/${activity.slug}`}
+                      aria-label={`Acquista ${activity.title}`}
+                    >
+                      {packPriceFrom(activity) != null ? (
+                        <span>
+                          Acquista pacchetti a partire da {formatEuro(packPriceFrom(activity)!)}
+                        </span>
+                      ) : null}
+                      {activity.priceMonthly != null ? (
+                        <span>Paga mensilmente da {formatEuro(activity.priceMonthly)}</span>
+                      ) : null}
+                      {packPriceFrom(activity) == null &&
+                      activity.priceMonthly == null &&
+                      activity.priceCourse != null ? (
+                        <span>Acquista corso · {formatEuro(activity.priceCourse)}</span>
+                      ) : null}
+                    </Link>
+                  ) : (
+                    <Link
+                      className="btn"
+                      to={`/attivita/${activity.slug}`}
+                      aria-label={`Scopri di più su ${activity.title}`}
+                    >
+                      Scopri di più
+                    </Link>
+                  )}
                 </article>
               </li>
             ))}
           </ul>
         )}
-      </section>
-
-      <section className="about">
-        <div id="chi-siamo">
-          <p className="eyebrow eyebrow-red">Chi siamo</p>
-          <h2>Zoe significa nuova vita.</h2>
-          <p className="lede">
-            Zoe è un’associazione no profit. Si dedica a migliorare la qualità
-            della vita dei soci, dai bambini agli adulti, senza limiti d’età: nel
-            tempo libero, con il gioco e con attività ludiche ed educative.
-          </p>
-          <p className="lede">
-            Ogni persona ha talenti e risorse da far emergere, per il lavoro, la
-            famiglia, le relazioni e la comunità. In sede i corsi e i laboratori
-            fanno sperimentare logica, creatività, manualità e pensiero
-            computazionale. Oggi ci sono robotica e LEGO, coding e droni,
-            informatica, inglese e pittura. Online, l’avvicinamento alla LIS è
-            aperto a tutte le età.
-          </p>
-          <p className="lede">
-            Durante l’anno ogni socio può seguire corsi, laboratori ed eventi a Li
-            Punti. Zoe crede nella solidarietà: la quota inclusa nella tessera
-            sostiene i progetti sociali e aiuta la comunità contro isolamento e
-            solitudine. L’iscrizione resta in associazione.
-          </p>
-        </div>
       </section>
 
       <section className="contact" id="contatti">

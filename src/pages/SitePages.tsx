@@ -1,9 +1,9 @@
 import { Navigate } from "react-router-dom";
 import { ContentPage } from "../components/ContentPage";
-import { getSitePage } from "../content/pages";
+import { getResolvedSitePage } from "../content/siteCmsStore";
 
 function pageOrHome(slug: string) {
-  const page = getSitePage(slug);
+  const page = getResolvedSitePage(slug);
   if (!page) return <Navigate to="/" replace />;
   return <ContentPage page={page} />;
 }
