@@ -17,7 +17,7 @@ export function AdminLayout() {
   useEffect(() => {
     if (!session || syncedOnce.current) return;
     syncedOnce.current = true;
-    void syncAllLocalToCloud();
+    void syncAllLocalToCloud({ activations: false });
   }, [session]);
 
   if (!ready) {

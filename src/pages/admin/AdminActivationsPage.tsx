@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   activateManuallyAndSync,
+  deleteActivation,
   deleteActivationAndSync,
   hydrateAdminCatalog,
   listActivations,
@@ -22,6 +23,12 @@ import {
 import { useAdminAuth } from "../../admin/AuthContext";
 import { fetchApprovedMembers, type ApprovedMember } from "../../admin/members";
 import { dateOnly, formatCourseDay } from "../../lib/coursePeriod";
+import {
+  deleteCloudActivation,
+  fetchMemberCloudActivations,
+  setCloudActivationStatus,
+  type CloudActivation,
+} from "../../lib/cloudSync";
 import { getSupabase, isSupabaseConfigured } from "../../lib/supabase";
 
 function formatEuro(value: number) {
@@ -30,6 +37,13 @@ function formatEuro(value: number) {
     currency: "EUR",
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+function activationStatusLabel(status: string) {
+  if (status === "active") return "Attiva";
+  if (status === "exhausted") return "Esaurita";
+  if (status === "revoked") return "Revocata";
+  return "Scaduta";
 }
 
 type RenewalRequestRow = {
@@ -50,6 +64,8 @@ export function AdminActivationsPage() {
   const [products, setProducts] = useState(() => listProducts());
   const [activations, setActivations] = useState<ProductActivation[]>([]);
   const [renewals, setRenewals] = useState<RenewalRequestRow[]>([]);
+  const [cloudActivations, setCloudActivations] = useState<CloudActivation[]>([]);
+  const [cloudError, setCloudError] = useState("");
   const [productId, setProductId] = useState(params.get("prodotto") || "");
   const [memberId, setMemberId] = useState("");
   const [paymentChannel, setPaymentChannel] = useState<PaymentChannel>("sede");
@@ -122,6 +138,64 @@ export function AdminActivationsPage() {
     setActivations(listActivations());
   }
 
+  async function refreshCloud(userId = memberId) {
+    const member = members.find((item) => item.id === userId);
+    if (!isSupabaseConfigured() || !userId || !member) {
+      setCloudActivations([]);
+      return;
+    }
+    const result = await fetchMemberCloudActivations(userId, {
+      name: member.name,
+      email: member.email,
+    });
+    setCloudError(result.error || "");
+    setCloudActivations(result.rows);
+  }
+
+  function removeLocalCopies(activation: CloudActivation) {
+    const email = activation.memberEmail.trim().toLowerCase();
+    for (const local of listActivations()) {
+      if (local.memberEmail.trim().toLowerCase() !== email) continue;
+      const product = products.find((item) => item.id === local.productId);
+      if (!product || product.title !== activation.productTitle) continue;
+      if (activation.kind === "pack" && local.entriesTotal !== activation.entriesTotal) continue;
+      const localChild = local.participantName?.trim() || "";
+      const cloudChild = activation.participantName?.trim() || "";
+      if (localChild && cloudChild && localChild !== cloudChild) continue;
+      deleteActivation(local.id);
+    }
+    refresh();
+  }
+
+  async function onCloudStatus(activation: CloudActivation, active: boolean) {
+    const result = await setCloudActivationStatus(activation, active);
+    if (!result.ok) {
+      setMessage(result.error || "Aggiornamento non riuscito.");
+      return;
+    }
+    setMessage(active ? "Attivazione riattivata." : "Attivazione disattivata.");
+    await refreshCloud();
+  }
+
+  async function onCloudDelete(activation: CloudActivation) {
+    const who = activation.participantName || activation.memberName;
+    if (
+      !window.confirm(
+        `Eliminare l’attivazione di ${who} per ${activation.productTitle}? Non si può annullare.`,
+      )
+    ) {
+      return;
+    }
+    const result = await deleteCloudActivation(activation);
+    if (!result.ok) {
+      setMessage(result.error || "Eliminazione non riuscita.");
+      return;
+    }
+    removeLocalCopies(activation);
+    setMessage("Attivazione eliminata.");
+    await refreshCloud();
+  }
+
   useEffect(() => {
     document.title = "Attivazioni · Admin Zoe";
     refresh();
@@ -148,6 +222,11 @@ export function AdminActivationsPage() {
       }
     })();
   }, [authReady, adminSession?.id]);
+
+  useEffect(() => {
+    if (!authReady || !memberId || members.length === 0) return;
+    void refreshCloud(memberId);
+  }, [authReady, memberId, members]);
 
   useEffect(() => {
     const fromQuery = params.get("prodotto");
@@ -413,6 +492,7 @@ export function AdminActivationsPage() {
         : `Attivato in locale per ${who}, sync non riuscita: ${result.syncError || "errore"}.`,
     );
     refresh();
+    void refreshCloud();
     document.getElementById("attivazioni-recenti")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -664,9 +744,52 @@ export function AdminActivationsPage() {
       )}
 
       <h2 className="admin-subhead" id="attivazioni-recenti">
-        Attivazioni recenti
+        Attivazioni di {members.find((item) => item.id === memberId)?.name || "questo socio"}
       </h2>
-      {activations.length === 0 ? (
+      {cloudError ? <p className="admin-form-error">{cloudError}</p> : null}
+      {isSupabaseConfigured() ? (
+        cloudActivations.length === 0 ? (
+          <p className="admin-empty">Nessuna attivazione per questo socio.</p>
+        ) : (
+          <ul className="admin-table">
+            {cloudActivations.map((activation) => (
+              <li key={`${activation.kind}-${activation.id}`}>
+                <div className="admin-table-main">
+                  <strong>
+                    {activation.participantName || "Senza bambino"} · {activation.productTitle}
+                  </strong>
+                  <span>
+                    {activation.memberEmail}
+                    {activation.kind === "pack"
+                      ? ` · Pacchetto da ${activation.entriesTotal} · usati ${activation.entriesUsed}`
+                      : " · Corso"}
+                    {` · ${activationStatusLabel(activation.status)}`}
+                    {` · ${new Date(activation.createdAt).toLocaleString("it-IT")}`}
+                  </span>
+                </div>
+                <div className="admin-table-actions">
+                  {activation.status === "active" ? (
+                    <button type="button" onClick={() => void onCloudStatus(activation, false)}>
+                      Disattiva
+                    </button>
+                  ) : (
+                    <button type="button" onClick={() => void onCloudStatus(activation, true)}>
+                      Riattiva
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="admin-action-danger"
+                    onClick={() => void onCloudDelete(activation)}
+                  >
+                    Elimina
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )
+      ) : activations.length === 0 ? (
         <p className="admin-empty">Nessuna attivazione ancora.</p>
       ) : (
         <ul className="admin-table">

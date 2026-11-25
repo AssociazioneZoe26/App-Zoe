@@ -2997,6 +2997,18 @@ h2 {
   cursor: not-allowed;
 }
 
+.member-participant-btn-add {
+  justify-self: start;
+  min-width: 0;
+  padding: 12px 18px;
+  background: var(--blue);
+  color: white;
+}
+
+.member-participant-btn-add:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
 .member-participant-btn-edit {
   background: var(--blue);
   color: white;

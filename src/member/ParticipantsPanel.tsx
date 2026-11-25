@@ -35,6 +35,7 @@ export function ParticipantsPanel({ guardianId, enabled }: Props) {
   const [error, setError] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
 
   async function load() {
     const supabase = getSupabase();
@@ -67,11 +68,13 @@ export function ParticipantsPanel({ guardianId, enabled }: Props) {
     });
     setError("");
     setNote("");
+    setFormOpen(true);
   }
 
   function resetForm() {
     setEditingId(null);
     setForm(emptyForm);
+    setFormOpen(false);
   }
 
   async function onSubmit(event: FormEvent) {
@@ -167,6 +170,10 @@ export function ParticipantsPanel({ guardianId, enabled }: Props) {
         </ul>
       )}
 
+      {error ? <p className="admin-form-error">{error}</p> : null}
+      {note ? <p className="admin-form-note">{note}</p> : null}
+
+      {formOpen ? (
       <form className="admin-form member-participant-form" onSubmit={onSubmit}>
         <h3>{editingId ? "Modifica partecipante" : "Aggiungi partecipante"}</h3>
         <div className="admin-form-row">
@@ -215,19 +222,29 @@ export function ParticipantsPanel({ guardianId, enabled }: Props) {
             </select>
           </label>
         </div>
-        {error ? <p className="admin-form-error">{error}</p> : null}
-        {note ? <p className="admin-form-note">{note}</p> : null}
         <div className="member-pass-actions">
           <button type="submit" className="admin-submit" disabled={busy}>
             {busy ? "Salvataggio…" : editingId ? "Salva modifiche" : "Aggiungi"}
           </button>
-          {editingId ? (
-            <button type="button" className="btn member-renew" onClick={resetForm}>
-              Annulla
-            </button>
-          ) : null}
+          <button type="button" className="btn member-renew" onClick={resetForm}>
+            Annulla
+          </button>
         </div>
       </form>
+      ) : (
+        <button
+          type="button"
+          className="member-participant-btn member-participant-btn-add"
+          onClick={() => {
+            setEditingId(null);
+            setForm(emptyForm);
+            setError("");
+            setFormOpen(true);
+          }}
+        >
+          Aggiungi partecipante
+        </button>
+      )}
     </section>
   );
 }

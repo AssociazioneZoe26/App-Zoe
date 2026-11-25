@@ -322,8 +322,10 @@ export async function syncMemberPassEntriesToSupabase(passId: string) {
   return { ok: true as const, id: data.id as string };
 }
 
-/** Push prodotti e attivazioni. Mai le pagine sito: le gestisce solo Team Zoe con Salva. */
-export async function syncAllLocalToCloud(): Promise<CloudSyncResult> {
+/** Push prodotti e, se richiesto, attivazioni. Mai le pagine sito: le gestisce solo Team Zoe con Salva. */
+export async function syncAllLocalToCloud(options?: {
+  activations?: boolean;
+}): Promise<CloudSyncResult> {
   const result: CloudSyncResult = {
     products: 0,
     pages: 0,
@@ -344,6 +346,8 @@ export async function syncAllLocalToCloud(): Promise<CloudSyncResult> {
     );
   }
 
+  if (options?.activations === false) return result;
+
   for (const activation of listActivations().filter((item) => item.status === "active")) {
     const synced = await syncActivationToSupabase(activation.id);
     if (synced.ok) result.activations += 1;
@@ -351,4 +355,108 @@ export async function syncAllLocalToCloud(): Promise<CloudSyncResult> {
   }
 
   return result;
+}
+
+export type CloudActivation = {
+  id: string;
+  kind: "pack" | "course";
+  memberName: string;
+  memberEmail: string;
+  productTitle: string;
+  participantName: string | null;
+  status: string;
+  entriesTotal: number;
+  entriesUsed: number;
+  createdAt: string;
+};
+
+type CloudRow = {
+  id: string;
+  status: string;
+  created_at: string;
+  entries_total?: number;
+  entries_used?: number;
+  products: { title?: string } | { title?: string }[] | null;
+  participants: { first_name?: string; last_name?: string } | { first_name?: string; last_name?: string }[] | null;
+  profiles: { full_name?: string; email?: string } | { full_name?: string; email?: string }[] | null;
+};
+
+function one<T>(value: T | T[] | null): T | null {
+  if (!value) return null;
+  return Array.isArray(value) ? value[0] ?? null : value;
+}
+
+function mapCloudRow(row: CloudRow, kind: CloudActivation["kind"]): CloudActivation {
+  const profile = one(row.profiles);
+  const participant = one(row.participants);
+  const product = one(row.products);
+  const child = [participant?.first_name, participant?.last_name].filter(Boolean).join(" ").trim();
+  return {
+    id: row.id,
+    kind,
+    memberName: profile?.full_name?.trim() || profile?.email || "Socio",
+    memberEmail: profile?.email || "",
+    productTitle: product?.title || "Attività",
+    participantName: child || null,
+    status: row.status,
+    entriesTotal: Number(row.entries_total) || 0,
+    entriesUsed: Number(row.entries_used) || 0,
+    createdAt: row.created_at,
+  };
+}
+
+/** Attivazioni di un socio, lette dal database e non dal browser. */
+export async function fetchMemberCloudActivations(
+  userId: string,
+  member: { name: string; email: string },
+): Promise<{ rows: CloudActivation[]; error?: string }> {
+  if (!isSupabaseConfigured() || !userId) return { rows: [] };
+  const supabase = getSupabase();
+  const packSelect =
+    "id, status, created_at, entries_total, entries_used, products(title), participants(first_name, last_name)";
+  const courseSelect =
+    "id, status, created_at, products(title), participants(first_name, last_name)";
+  const [packs, courses] = await Promise.all([
+    supabase
+      .from("entry_packs")
+      .select(packSelect)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("entitlements")
+      .select(courseSelect)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false }),
+  ]);
+  const error = packs.error?.message || courses.error?.message;
+  if (error) return { rows: [], error };
+  const withMember = (row: CloudRow): CloudRow => ({
+    ...row,
+    profiles: { full_name: member.name, email: member.email },
+  });
+  const rows = [
+    ...((packs.data as CloudRow[] | null) ?? []).map((row) => mapCloudRow(withMember(row), "pack")),
+    ...((courses.data as CloudRow[] | null) ?? []).map((row) => mapCloudRow(withMember(row), "course")),
+  ];
+  return { rows: rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt)) };
+}
+
+export async function setCloudActivationStatus(
+  item: Pick<CloudActivation, "id" | "kind">,
+  active: boolean,
+) {
+  const supabase = getSupabase();
+  const status = active ? "active" : "expired";
+  const table = item.kind === "pack" ? "entry_packs" : "entitlements";
+  const { error } = await supabase.from(table).update({ status }).eq("id", item.id);
+  if (error) return { ok: false as const, error: error.message };
+  return { ok: true as const };
+}
+
+export async function deleteCloudActivation(item: Pick<CloudActivation, "id" | "kind">) {
+  const supabase = getSupabase();
+  const table = item.kind === "pack" ? "entry_packs" : "entitlements";
+  const { error } = await supabase.from(table).delete().eq("id", item.id);
+  if (error) return { ok: false as const, error: error.message };
+  return { ok: true as const };
 }
