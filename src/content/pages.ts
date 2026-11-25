@@ -3,6 +3,8 @@ export type ContentSection = {
   body: string;
   image?: string;
   imageAlt?: string;
+  cta?: string;
+  ctaTo?: string;
 };
 
 export type ContentVideo = {
@@ -67,7 +69,7 @@ export const sitePages: Record<string, SitePage> = {
         imageFit: "natural",
       },
       {
-        title: "Squadra Robotica",
+        title: "Squadra di robotica",
         body: "Testo placeholder. Qui presenteremo la squadra, gli allenamenti e le gare di robotica.",
         to: "/squadra-robotica",
         cta: "Scopri la Squadra",
@@ -77,7 +79,7 @@ export const sitePages: Record<string, SitePage> = {
       },
       {
         title: "Progetti",
-        body: "Sei una scuola della Sardegna? Un comune che vuole organizzare corsi o attività? Zoe collabora con le scuole e i comuni sul territorio e organizza gite e uscite formative. Percorsi educativi, iniziative condivise e esperienze fuori sede per bambini, ragazzi e comunità.",
+        body: "Sei una scuola della Sardegna? Un comune che vuole organizzare corsi o attività? Zoe collabora con le scuole e i comuni sul territorio, organizza viaggi di istruzione e attività estive. Percorsi educativi, iniziative condivise e esperienze fuori sede per bambini, ragazzi e comunità.",
         to: "/progetti/scuole",
         cta: "Vedi i progetti",
         image: "/site/progetti.jpg",
@@ -118,9 +120,9 @@ export const sitePages: Record<string, SitePage> = {
   },
   "squadra-robotica": {
     slug: "squadra-robotica",
-    title: "Squadra Robotica",
-    documentTitle: "Squadra Robotica · Zoe",
-    heroTitle: "Squadra Robotica.",
+    title: "Squadra di robotica",
+    documentTitle: "Squadra di robotica · Zoe",
+    heroTitle: "Squadra di robotica.",
     heroText:
       "Allenamento, progettazione e gare: la squadra di robotica di Zoe. I testi, le foto e i video di questa pagina li aggiorna Zoe dall’admin.",
     heroImage: "/corsi/laboratori-robotica.jpg",
@@ -168,16 +170,44 @@ export const sitePages: Record<string, SitePage> = {
   },
   "progetti-gite": {
     slug: "progetti-gite",
-    title: "Progetti · Gite",
-    documentTitle: "Gite · Zoe",
-    heroTitle: "Gite e uscite.",
+    title: "Progetti · Viaggi di istruzione",
+    documentTitle: "Viaggi di istruzione · Zoe",
+    heroTitle: "Viaggi di istruzione.",
     heroText:
-      "Uscite e gite organizzate da Zoe. Foto, racconti e video si aggiornano dall’admin.",
+      "Uscite formative e viaggi di istruzione organizzati da Zoe. Foto, racconti e video si aggiornano dall’admin.",
     heroImage: "/hero/laboratorio-2.jpg",
     sections: [
       {
         title: "In costruzione",
-        body: "Questa pagina raccoglierà le gite e le uscite. Zoe potrà pubblicare testi, immagini e video dall’admin.",
+        body: "Questa pagina raccoglierà i viaggi di istruzione e le uscite. Zoe potrà pubblicare testi, immagini e video dall’admin.",
+      },
+    ],
+    videos: [],
+  },
+  "progetti-attivita-estive": {
+    slug: "progetti-attivita-estive",
+    title: "Progetti · Attività estive",
+    documentTitle: "Attività estive · Zoe",
+    heroTitle: "Attività estive.",
+    heroText:
+      "Estate con Zoe: campi, laboratori e settimane per bambini e ragazzi. Testi, foto e video si aggiornano dall’admin.",
+    heroImage: "/hero/laboratorio.jpg",
+    sections: [
+      {
+        title: "Settimane estive in sede",
+        body: "Giornate in associazione a Li Punti: laboratori, gioco, STEM e tempo insieme. Calendario, orari e posti si confermano in sede.",
+        image: "/site/progetti.jpg",
+        imageAlt: "Ragazzi durante un’attività Zoe",
+        cta: "Contattaci",
+        ctaTo: "/contatti",
+      },
+      {
+        title: "Laboratori d’estate",
+        body: "Robotica, coding, arte e attività all’aperto per bambini e ragazzi. Per maggiori informazioni, posti e iscrizioni scrivi a Team Zoe.",
+        image: "/hero/laboratorio-2.jpg",
+        imageAlt: "Laboratorio estivo Zoe",
+        cta: "Contattaci",
+        ctaTo: "/contatti",
       },
     ],
     videos: [],
@@ -204,12 +234,85 @@ export const sitePages: Record<string, SitePage> = {
     documentTitle: "Scarica l’app · Zoe",
     heroTitle: "L’app di Zoe.",
     heroText:
-      "Presto l’area soci e le attività saranno anche in un’app da scaricare. Intanto puoi usare Zoe Academy dal browser e accedere come socio.",
-    heroImage: "/hero/laboratorio.jpg",
+      "Porta Zoe Academy sempre con te: area soci, corsi e aggiornamenti a portata di tap. Disponibile su smartphone da Google Play e App Store.",
+    heroImage: "/site/scarica-app-hero.jpg",
+    heroImagePosition: "center",
     sections: [
       {
-        title: "In arrivo",
-        body: "Quando l’app sarà pubblicata su App Store e Play, i link di download compariranno qui. Zoe aggiornerà questa pagina dall’admin.",
+        title: "Perché scaricare l’app",
+        body: "Con l’app segui le tue attività in modo più semplice e resti aggiornata/o senza dover aprire il sito ogni volta. È pensata per lo smartphone: rapida, chiara e sempre a disposizione.",
+      },
+      {
+        title: "Notifiche utili",
+        body: "Ricevi un avviso quando un abbonamento sta per scadere e quando gli ingressi del pacchetto stanno per finire, così puoi rinnovare in tempo e non perdere le lezioni.",
+      },
+      {
+        title: "Tutto a portata di mano",
+        body: "Consulta i tuoi corsi, i partecipanti e le scadenze dall’area soci. Novità, laboratori e comunicazioni di Associazione Zoe arrivano direttamente sul telefono.",
+      },
+    ],
+    videos: [],
+  },
+  privacy: {
+    slug: "privacy",
+    title: "Privacy",
+    documentTitle: "Informativa privacy · Zoe",
+    heroTitle: "Informativa privacy.",
+    heroText:
+      "Come Associazione Zoe tratta i dati personali su questo sito e nell’area soci. Testo bozza da validare con Zoe.",
+    heroImage: "/site/chi-siamo.jpg",
+    sections: [
+      {
+        title: "Titolare del trattamento",
+        body: "Associazione Zoe, Via Li Punti 12, 07100 Sassari. Contatto: info@associazionezoe.org · 347 3814081.",
+      },
+      {
+        title: "Dati trattati",
+        body: "Dati di registrazione socio (nome, email, password), stato di iscrizione, partecipanti collegati all’account, iscrizioni a corsi e pacchetti, richieste di rinnovo, iscrizione newsletter (nome ed email), dati tecnici di navigazione e log di sicurezza.",
+      },
+      {
+        title: "Finalità e base giuridica",
+        body: "Gestione dell’associazione e dell’area soci (contratto/adesione); erogazione di corsi, laboratori e contenuti online; comunicazioni operative; newsletter e marketing solo con consenso; obblighi di legge e sicurezza del servizio.",
+      },
+      {
+        title: "Conservazione e diritti",
+        body: "I dati sono conservati per il tempo necessario alle finalità indicate e agli obblighi di legge. Puoi richiedere accesso, rettifica, cancellazione, limitazione, opposizione e portabilità scrivendo a info@associazionezoe.org. Hai diritto di reclamare al Garante Privacy.",
+      },
+      {
+        title: "Nota",
+        body: "Questa pagina è una bozza operativa. Zoe completerà e validerà il testo definitivo prima del go-live completo.",
+      },
+    ],
+    videos: [],
+  },
+  termini: {
+    slug: "termini",
+    title: "Termini",
+    documentTitle: "Termini di utilizzo · Zoe",
+    heroTitle: "Termini di utilizzo.",
+    heroText:
+      "Condizioni di uso del sito, dell’area soci e dei servizi Academy. Testo bozza da validare con Zoe.",
+    heroImage: "/site/zoe-academy.jpg",
+    sections: [
+      {
+        title: "Servizio",
+        body: "Il sito e l’area soci consentono di consultare le attività di Associazione Zoe, gestire l’account socio, i partecipanti e le iscrizioni a corsi, laboratori e contenuti online.",
+      },
+      {
+        title: "Account socio",
+        body: "La registrazione richiede dati veritieri e l’accettazione dell’informativa privacy. L’accesso all’area riservata può richiedere conferma email e approvazione di Team Zoe. Le credenziali sono personali.",
+      },
+      {
+        title: "Attività e pagamenti",
+        body: "Prezzi, posti e calendari sono indicati nelle schede prodotto. Fino all’attivazione dei pagamenti online, iscrizioni e rinnovi possono essere gestiti in sede o su WhatsApp. I rimborsi seguono le regole comunicate da Zoe per ogni attività.",
+      },
+      {
+        title: "Contenuti online",
+        body: "I video e i materiali dei corsi online sono riservati ai soci con accesso attivo. È vietata la condivisione non autorizzata delle credenziali o dei contenuti.",
+      },
+      {
+        title: "Nota",
+        body: "Questa pagina è una bozza operativa. Zoe completerà condizioni di vendita e policy di rimborso definitive.",
       },
     ],
     videos: [],

@@ -1,39 +1,39 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Layout } from "../components/Layout";
+import { LoginExitActions } from "../components/LoginExitActions";
 import { useMemberAuth } from "../member/MemberAuthContext";
 
 export function MemberLoginPage() {
-  const { session, ready, login, getRememberedCredentials } = useMemberAuth();
+  const { session, ready, login, getRememberedEmail } = useMemberAuth();
   const navigate = useNavigate();
-  const remembered = getRememberedCredentials();
-  const [email, setEmail] = useState(remembered?.email || "");
-  const [password, setPassword] = useState(remembered?.password || "");
+  const [email, setEmail] = useState(() => getRememberedEmail() || "");
+  const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     document.title = "Accesso Associati · Zoe";
-    const saved = getRememberedCredentials();
+    const saved = getRememberedEmail();
     if (saved) {
-      setEmail(saved.email);
-      setPassword(saved.password);
+      setEmail(saved);
       setRemember(true);
     }
-  }, [getRememberedCredentials]);
+  }, [getRememberedEmail]);
 
   if (ready && session) {
     return <Navigate to="/accedi/associati/area" replace />;
   }
+  // pending/rejected/suspended: login consentito, area mostra messaggio informativo
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const result = login(email, password, remember);
+    setError("");
+    const result = await login(email, password, remember);
     if (!result.ok) {
       setError(result.error);
       return;
     }
-    setError("");
     navigate("/accedi/associati/area", { replace: true });
   }
 
@@ -42,7 +42,10 @@ export function MemberLoginPage() {
       <section className="access-page member-login-page">
         <p className="eyebrow eyebrow-red">Associati</p>
         <h1>Accesso Associati Zoe</h1>
-        <p className="lede">Entra con la tua email di socio.</p>
+        <p className="lede">
+          Entra con l’email usata in registrazione. Se sei in attesa di approvazione puoi comunque
+          accedere e vedere lo stato della richiesta.
+        </p>
 
         <form className="admin-form member-login-form" onSubmit={onSubmit}>
           <label>
@@ -73,7 +76,7 @@ export function MemberLoginPage() {
               checked={remember}
               onChange={(event) => setRemember(event.target.checked)}
             />
-            <span>Ricorda email e password</span>
+            <span>Ricorda email</span>
           </label>
           {error ? <p className="admin-form-error">{error}</p> : null}
           <button type="submit" className="admin-submit">
@@ -82,8 +85,11 @@ export function MemberLoginPage() {
         </form>
 
         <p className="member-login-back">
-          <Link to="/accedi">← Torna alla scelta accesso</Link>
+          <Link to="/accedi/associati/registrati">Iscriviti ora</Link>
+          {" · "}
+          <Link to="/accedi/associati/recupero-password">Password dimenticata?</Link>
         </p>
+        <LoginExitActions />
       </section>
     </Layout>
   );

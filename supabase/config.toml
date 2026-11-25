@@ -1,0 +1,29 @@
+project_id = "eyyprcnbyhkygxiggais"
+
+[api]
+enabled = true
+
+[db]
+major_version = 17
+
+[auth]
+enabled = true
+site_url = "https://app-zoe.vercel.app"
+additional_redirect_urls = [
+  "https://app-zoe.vercel.app/**",
+  "https://app-zoe-zoe-app.vercel.app/**",
+  "http://localhost:5173/**",
+  "http://127.0.0.1:5173/**",
+]
+
+[functions.create-order]
+verify_jwt = true
+
+[functions.mock-confirm-payment]
+verify_jwt = true
+
+[functions.mock-fail-payment]
+verify_jwt = true
+
+[functions.set-member-status]
+verify_jwt = true

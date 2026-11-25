@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../../admin/AuthContext";
+import { LoginExitActions } from "../../components/LoginExitActions";
 
 export function AdminLoginPage() {
   const { session, ready, login } = useAdminAuth();
@@ -18,26 +19,32 @@ export function AdminLoginPage() {
     return <Navigate to="/admin" replace />;
   }
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const result = login(email, password, remember);
+    setError("");
+    const result = await login(email, password, remember);
     if (!result.ok) {
       setError(result.error);
       return;
     }
-    setError("");
     navigate("/admin", { replace: true });
   }
 
   return (
     <div className="admin-shell admin-login-shell">
+      <div className="admin-login-stack">
       <div className="admin-login">
-        <Link to="/" className="admin-login-brand">
-          <img src="/brand/zoe-logo.png" alt="Zoe" />
-        </Link>
+        <div className="brand-pair admin-login-brand">
+          <Link to="/" className="brand brand-zoe" aria-label="Zoe, vai al sito">
+            <img src="/brand/zoe-logo.png" alt="Zoe" />
+          </Link>
+          <Link to="/academy" className="brand brand-academy" aria-label="Zoe Academy">
+            <img src="/brand/academy-emblem.png" alt="Zoe Academy" />
+          </Link>
+        </div>
         <p className="eyebrow eyebrow-red">Area admin</p>
         <h1>Accedi</h1>
-        <p className="lede">Accesso Zoe Team.</p>
+        <p className="lede">Accesso Team Zoe.</p>
 
         <form className="admin-form" onSubmit={onSubmit}>
           <label>
@@ -75,6 +82,14 @@ export function AdminLoginPage() {
             Entra
           </button>
         </form>
+
+        <p className="admin-login-back">
+          <Link to="/accedi/associati/recupero-password">
+            Prima volta o password dimenticata? Imposta password
+          </Link>
+        </p>
+      </div>
+      <LoginExitActions />
       </div>
     </div>
   );

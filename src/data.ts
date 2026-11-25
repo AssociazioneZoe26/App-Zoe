@@ -19,14 +19,25 @@ export type Activity = {
   image?: string;
   accent: "blue" | "yellow" | "teal" | "pink";
   teacher?: string;
-  /** Presente nei corsi online creati da admin: URL del video corso completo */
+  /** Corsi online: anteprima pubblica */
+  coursePreviewVideoUrl?: string;
+  coursePreviewSeconds?: number;
+  /** Corsi online: un unico video completo */
   courseVideoUrl?: string;
+  /** Corsi online: lezioni 1–10 (video completi) */
+  courseLessons?: { title: string; url: string }[];
   fullText?: string;
-  /** Durata complessiva del corso */
+  /** Scadenza del corso */
   courseDuration?: string;
-  /** Costo pacchetto 5 ingressi (€) */
+  /** Inizio corso, YYYY-MM-DD */
+  courseStartsOn?: string;
+  /** Fine corso, YYYY-MM-DD */
+  courseEndsOn?: string;
+  /** Offerta unica di questa scheda */
+  offer?: "packs" | "pack4" | "pack8" | "monthly" | "course";
+  /** Costo pacchetto 4 ingressi (€) */
   pricePack5?: number;
-  /** Costo pacchetto 10 ingressi (€) */
+  /** Costo pacchetto 8 ingressi (€) */
   pricePack10?: number;
   /** Canone mensile rinnovabile area socio (€) */
   priceMonthly?: number;
@@ -83,36 +94,10 @@ export const activities: Activity[] = [
     image: "/corsi/laboratori-lego.jpg",
     accent: "yellow",
     courseDuration: "Anno scolastico",
+    offer: "packs",
     pricePack5: 50,
     pricePack10: 90,
-    priceMonthly: 100,
-    priceCourse: 280,
-  },
-  {
-    slug: "laboratori-robotica",
-    title: "Laboratori di robotica",
-    eyebrow: "Zoe Academy",
-    age: "8–13 anni",
-    category: "Laboratorio",
-    workshop: true,
-    audience: "Bambini",
-    online: false,
-    mantra: "Costruisci, immagina, impara",
-    summary:
-      "Un laboratorio per entrare nella robotica giocando: si progetta, si costruisce e si lavora in gruppo.",
-    points: [
-      "Creatività, logica e collaborazione",
-      "Lavoro di squadra e cooperazione",
-      "Quattro incontri, un’ora a settimana",
-    ],
-    schedule: "Da mercoledì 23 settembre",
-    time: "17:00–18:00",
-    sessions: "4 incontri",
-    place: "Via Li Punti 12, Sassari",
-    phone: "393473814081",
-    phoneLabel: "347 3814081",
-    image: "/corsi/laboratori-robotica.jpg",
-    accent: "blue",
+    priceMonthly: 45,
   },
   {
     slug: "coding-droni",
@@ -216,7 +201,7 @@ export const activities: Activity[] = [
 ];
 
 export const activityFilters = [
-  { id: "tutte", label: "Tutte" },
+  { id: "tutte", label: "Attività" },
   { id: "laboratorio", label: "Laboratori" },
   { id: "corso", label: "Corsi" },
   { id: "workshop", label: "Workshop" },
@@ -249,3 +234,6 @@ export const generalWhatsapp = whatsappHref(
   deskPhone.phone,
   "Ciao, vorrei informazioni sulle attività di Associazione Zoe.",
 );
+
+/** Link WhatsApp Associazione Zoe (stesso numero della sede). */
+export const whatsappChannel = generalWhatsapp;

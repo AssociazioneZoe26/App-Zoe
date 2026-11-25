@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { getCatalogActivities } from "../admin/productToActivity";
+import {
+  inferProductOffer,
+  offerLabel,
+  priceForOffer,
+} from "../admin/catalogTypes";
+import { getCatalogActivities, loadCatalogActivities } from "../admin/productToActivity";
 import { Layout } from "../components/Layout";
+import { NewsletterBanner } from "../components/NewsletterBanner";
 import {
   activityFilters,
   deskPhone,
@@ -19,11 +25,24 @@ function formatEuro(value: number) {
   }).format(value);
 }
 
-function packPriceFrom(activity: Activity) {
-  const packs = [activity.pricePack5, activity.pricePack10].filter(
-    (value): value is number => typeof value === "number",
+function catalogOffer(activity: Activity) {
+  return (
+    activity.offer ||
+    inferProductOffer({
+      online: activity.online,
+      kind: activity.online
+        ? "online"
+        : activity.workshop
+          ? "workshop"
+          : activity.category === "Laboratorio"
+            ? "laboratorio"
+            : "corso",
+      pricePack5: activity.pricePack5,
+      pricePack10: activity.pricePack10,
+      priceMonthly: activity.priceMonthly,
+      priceCourse: activity.priceCourse,
+    })
   );
-  return packs.length ? Math.min(...packs) : null;
 }
 
 function isFilter(value: string | null): value is FilterId {
@@ -53,7 +72,14 @@ export function Catalog() {
   );
 
   useEffect(() => {
-    setActivities(getCatalogActivities());
+    let cancelled = false;
+    void (async () => {
+      const next = await loadCatalogActivities();
+      if (!cancelled) setActivities(next);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function setFilter(id: FilterId) {
@@ -107,6 +133,8 @@ export function Catalog() {
         </div>
       </section>
 
+      <NewsletterBanner />
+
       <section className="catalog">
         <div className="catalog-head" id="catalogo">
           <div>
@@ -144,27 +172,48 @@ export function Catalog() {
                     <CourseArt activity={activity} />
                   </Link>
                   {isMember &&
-                  (packPriceFrom(activity) != null ||
-                    activity.priceMonthly != null ||
-                    activity.priceCourse != null) ? (
+                  (typeof activity.pricePack5 === "number" ||
+                    typeof activity.pricePack10 === "number" ||
+                    typeof activity.priceMonthly === "number" ||
+                    typeof priceForOffer(activity, catalogOffer(activity)) === "number") ? (
                     <Link
                       className="btn btn-buy-options"
                       to={`/attivita/${activity.slug}`}
                       aria-label={`Acquista ${activity.title}`}
                     >
-                      {packPriceFrom(activity) != null ? (
-                        <span>
-                          Acquista pacchetti a partire da {formatEuro(packPriceFrom(activity)!)}
-                        </span>
-                      ) : null}
-                      {activity.priceMonthly != null ? (
-                        <span>Paga mensilmente da {formatEuro(activity.priceMonthly)}</span>
-                      ) : null}
-                      {packPriceFrom(activity) == null &&
-                      activity.priceMonthly == null &&
-                      activity.priceCourse != null ? (
-                        <span>Acquista corso · {formatEuro(activity.priceCourse)}</span>
-                      ) : null}
+                      <span>
+                        {(() => {
+                          const offer = catalogOffer(activity);
+                          const packsOnCard =
+                            offer === "packs" || offer === "pack4" || offer === "pack8";
+                          const amounts = [
+                            packsOnCard ? activity.pricePack5 : undefined,
+                            packsOnCard ? activity.pricePack10 : undefined,
+                            packsOnCard || offer === "monthly" ? activity.priceMonthly : undefined,
+                          ].filter((value): value is number => typeof value === "number");
+                          const from = amounts.length ? Math.min(...amounts) : undefined;
+                          if (packsOnCard && amounts.length > 1 && typeof from === "number") {
+                            const parts = [
+                              typeof activity.pricePack5 === "number" ? "4" : null,
+                              typeof activity.pricePack10 === "number" ? "8" : null,
+                              typeof activity.priceMonthly === "number" ? "mensile" : null,
+                            ].filter(Boolean);
+                            return `Da ${formatEuro(from)} · ${parts.join(", ")}`;
+                          }
+                          if (packsOnCard && typeof activity.pricePack5 === "number") {
+                            return `Pacchetto 4 ingressi · ${formatEuro(activity.pricePack5)}`;
+                          }
+                          if (packsOnCard && typeof activity.pricePack10 === "number") {
+                            return `Pacchetto 8 ingressi · ${formatEuro(activity.pricePack10)}`;
+                          }
+                          if (typeof activity.priceMonthly === "number") {
+                            return `Abbonamento mensile · ${formatEuro(activity.priceMonthly)}/mese`;
+                          }
+                          return `${offerLabel(offer)} · ${formatEuro(
+                            priceForOffer(activity, offer)!,
+                          )}${offer === "monthly" ? "/mese" : ""}`;
+                        })()}
+                      </span>
                     </Link>
                   ) : (
                     <Link
@@ -181,39 +230,6 @@ export function Catalog() {
           </ul>
         )}
       </section>
-
-      <section className="contact" id="contatti">
-        <div>
-          <p className="eyebrow eyebrow-red">Dove siamo</p>
-          <h2>Li Punti, a due passi dalle Poste.</h2>
-          <p className="lede">
-            Via Li Punti 12, Sassari. Strada interna, davanti alle Poste
-            Italiane. Per orari e posti liberi scrivi o chiama: l’iscrizione
-            si fa in associazione.
-          </p>
-        </div>
-        <ul className="contact-cards">
-          <li>
-            <span>Sede</span>
-            <strong>Via Li Punti 12</strong>
-            <p>07100 Sassari</p>
-          </li>
-          <li>
-            <span>Telefono</span>
-            <strong>
-              <a href="tel:+393473814081">{deskPhone.label}</a>
-            </strong>
-            <p>Anche su WhatsApp</p>
-          </li>
-          <li>
-            <span>Email</span>
-            <strong>
-              <a href="mailto:info@associazionezoe.org">info@associazionezoe.org</a>
-            </strong>
-            <p>Per informazioni</p>
-          </li>
-        </ul>
-      </section>
     </Layout>
   );
 }
@@ -227,11 +243,19 @@ function CourseArt({ activity }: { activity: Activity }) {
     );
   }
 
+  const kindLabel = activity.workshop
+    ? "Workshop"
+    : activity.online
+      ? "Online"
+      : activity.category === "Laboratorio"
+        ? "Laboratorio"
+        : "Corso";
+
   return (
-    <div className="card-art card-art-made" aria-hidden="true">
+    <div className={`card-art card-art-made accent-${activity.accent}`} aria-hidden="true">
       <img src="/brand/academy-emblem.png" alt="" />
-      <p>Corso base</p>
-      <strong>Informatica</strong>
+      <p>{kindLabel}</p>
+      <strong>{activity.title}</strong>
       <em>{activity.age}</em>
       <span className="made-foot">Via Li Punti 12, Sassari</span>
     </div>

@@ -19,9 +19,19 @@ export function AdminHomePage() {
       </p>
       <ul className="admin-cards">
         <li>
+          <h2>Richieste di registrazione</h2>
+          <p>Approva, rifiuta, sospendi o riattiva i nuovi soci in attesa.</p>
+          <Link to="/admin/registrazioni">Apri richieste</Link>
+        </li>
+        <li>
           <h2>Pagine del sito</h2>
           <p>Home, Chi siamo, Squadra, Progetti, Carta docente: modifica testi e immagini in pagina.</p>
           <Link to="/">Apri il sito</Link>
+        </li>
+        <li>
+          <h2>Newsletter</h2>
+          <p>Unica lista iscritti e bozza del riepilogo corsi ogni due settimane.</p>
+          <Link to="/admin/newsletter">Apri newsletter</Link>
         </li>
         <li>
           <h2>Catalogo Academy</h2>
@@ -35,8 +45,8 @@ export function AdminHomePage() {
         </li>
         <li>
           <h2>Ingressi</h2>
-          <p>Flagga gli ingressi usati sul pacchetto del socio.</p>
-          <Link to="/admin/ingressi">Gestisci ingressi</Link>
+          <p>Lista soci con pacchetti laboratorio da 4 o 8 ingressi.</p>
+          <Link to="/admin/ingressi">Apri lista associati</Link>
         </li>
       </ul>
     </section>
