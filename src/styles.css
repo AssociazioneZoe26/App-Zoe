@@ -1428,10 +1428,30 @@ h2 {
   color: var(--blue-deep);
 }
 
+@media (max-width: 759px) {
+  .member-pass-media,
+  .member-art,
+  .member-art img {
+    width: 100%;
+    max-width: none;
+  }
+
+  .member-art img {
+    height: auto;
+    aspect-ratio: auto;
+    object-fit: contain;
+  }
+
+  .member-pass-media .pack-qr svg {
+    width: 168px;
+    height: 168px;
+  }
+}
+
 @media (min-width: 760px) {
   .member-pass {
     grid-template-columns: 240px 1fr;
-    align-items: center;
+    align-items: start;
     gap: 28px;
     padding: 18px;
   }
@@ -4125,6 +4145,32 @@ h2 {
   padding: 0;
   display: grid;
   gap: 16px;
+}
+
+.member-pass-media {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  width: 100%;
+}
+
+.member-pass-media .member-art,
+.member-pass-media .member-art img {
+  width: 100%;
+  max-width: none;
+}
+
+.member-pass-media .pack-qr {
+  margin-top: 0;
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  box-sizing: border-box;
+}
+
+.member-pass-media .pack-qr-hint {
+  max-width: none;
+  text-align: center;
 }
 
 .pack-qr {
