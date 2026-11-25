@@ -1,4 +1,5 @@
 import type { CatalogKind, CatalogProduct, CourseLesson } from "../admin/catalogTypes";
+import { courseDateToTimestamp } from "./coursePeriod";
 import { normalizeLessons } from "./courseVideo";
 import { getSupabase, getSupabaseFunctionsUrl, isSupabaseConfigured } from "./supabase";
 
@@ -331,12 +332,33 @@ export async function syncProductToSupabase(product: {
   if (existing?.id) {
     const { error } = await supabase.from("products").update(row).eq("id", existing.id);
     if (error) return { ok: false as const, error: error.message };
+    const aligned = await alignCourseEntitlements(existing.id as string, product);
+    if (!aligned.ok) return aligned;
     return { ok: true as const, id: existing.id as string };
   }
 
   const { data, error } = await supabase.from("products").insert(row).select("id").single();
   if (error || !data) return { ok: false as const, error: error?.message || "insert_failed" };
   return { ok: true as const, id: data.id as string };
+}
+
+/** Le iscrizioni già attive seguono inizio e fine della scheda corso. */
+async function alignCourseEntitlements(
+  productId: string,
+  product: { kind: string; startsOn?: string; endsOn?: string },
+) {
+  if (product.kind !== "corso" && product.kind !== "online") return { ok: true as const };
+  const { error } = await getSupabase()
+    .from("entitlements")
+    .update({
+      starts_at: product.startsOn ? courseDateToTimestamp(product.startsOn) : null,
+      ends_at: product.endsOn ? courseDateToTimestamp(product.endsOn) : null,
+    })
+    .eq("product_id", productId)
+    .eq("kind", "course")
+    .in("status", ["active", "expired"]);
+  if (error) return { ok: false as const, error: error.message };
+  return { ok: true as const };
 }
 
 export async function resolveSupabaseProductIdBySlug(slug: string) {

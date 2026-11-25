@@ -11,19 +11,12 @@ import { CourseVideoPlayer } from "../components/CourseVideoPlayer";
 import { Layout } from "../components/Layout";
 import { activityWhatsapp, type Activity } from "../data";
 import { DEFAULT_PREVIEW_SECONDS, normalizeLessons } from "../lib/courseVideo";
-import { formatCourseDay, isPastEndDate } from "../lib/coursePeriod";
+import { formatCourseDay, formatMeetingCount, isPastEndDate } from "../lib/coursePeriod";
 import { fetchMemberEntryPacks, type MemberEntryPack } from "../lib/entryPacks";
 import { isSupabaseConfigured, getSupabase } from "../lib/supabase";
 import { useMemberAuth } from "../member/MemberAuthContext";
 import { getPassesForMember } from "../member/passesStore";
 import { syncMemberPassesFromActivations } from "../member/syncMemberPasses";
-
-function formatMeetingCount(value: string | undefined) {
-  const digits = value?.match(/\d+/)?.[0];
-  if (!digits) return "Da definire";
-  const count = Number(digits);
-  return count === 1 ? "1 incontro" : `${count} incontri`;
-}
 
 function formatEuro(value: number) {
   return new Intl.NumberFormat("it-IT", {
@@ -149,11 +142,12 @@ export function ActivityPage() {
         const name =
           [participant?.first_name, participant?.last_name].filter(Boolean).join(" ").trim() ||
           "Da associare";
-        const endsOn = (row.ends_at as string | null) || "";
+        const startsOn = activity.courseStartsOn || "";
+        const endsOn = activity.courseEndsOn || "";
         seats.push({
           id: row.id as string,
           name,
-          startsOn: (row.starts_at as string | null) || "",
+          startsOn,
           endsOn,
           expired: row.status === "expired" || isPastEndDate(endsOn),
         });

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { loadActivity, resolveActivity } from "../admin/productToActivity";
 import { Layout } from "../components/Layout";
-import { formatCourseDay, isPastEndDate } from "../lib/coursePeriod";
+import { formatCourseDay, formatMeetingCount, isPastEndDate } from "../lib/coursePeriod";
 import { getSupabase, isSupabaseConfigured } from "../lib/supabase";
 import { memberGateMessage, useMemberAuth } from "../member/MemberAuthContext";
 import { SignupPath } from "../member/SignupPath";
@@ -85,7 +85,7 @@ export function AccountPage() {
         supabase
           .from("entitlements")
           .select(
-            "id, kind, status, starts_at, ends_at, updated_at, participant_id, participants(first_name, last_name), products(id, title, slug, kind, preview_image)",
+            "id, kind, status, starts_at, ends_at, updated_at, participant_id, participants(first_name, last_name), products(id, title, slug, kind, preview_image, starts_on, ends_on, sessions)",
           )
           .eq("user_id", session.id)
           .in("status", ["active", "expired"]),
@@ -102,6 +102,9 @@ export function AccountPage() {
               slug?: string;
               kind?: string;
               preview_image?: string;
+              starts_on?: string | null;
+              ends_on?: string | null;
+              sessions?: string | null;
             }
           | null;
         if (!product?.slug || row.status === "revoked") continue;
@@ -112,7 +115,14 @@ export function AccountPage() {
           .filter(Boolean)
           .join(" ")
           .trim();
-        const expired = row.status === "expired" || isPastEndDate(row.ends_at as string | null);
+        const fromCard =
+          row.kind !== "monthly" &&
+          (row.kind === "course" || product.kind === "corso" || product.kind === "online");
+        const cardStart = fromCard ? product.starts_on || undefined : undefined;
+        const cardEnd = fromCard ? product.ends_on || undefined : undefined;
+        const expired =
+          row.status === "expired" ||
+          isPastEndDate(fromCard ? cardEnd : (row.ends_at as string | null));
         remote.push({
           id: `remote_ent_${row.id}`,
           memberEmail: session.email,
@@ -126,8 +136,8 @@ export function AccountPage() {
           status: expired ? "expired" : "active",
           entries: [],
           paymentChannel: "sede",
-          startsAt: (row.starts_at as string | null) || undefined,
-          endsAt: (row.ends_at as string | null) || undefined,
+          startsAt: fromCard ? cardStart : (row.starts_at as string | null) || undefined,
+          endsAt: fromCard ? cardEnd : (row.ends_at as string | null) || undefined,
           participantId: (row.participant_id as string | null) ?? null,
           participantName: child || null,
           updatedAt: row.updated_at || new Date().toISOString(),
@@ -282,7 +292,20 @@ export function AccountPage() {
               const poster = activity?.image || pass.previewImage;
               const counts = passCounts(pass);
               const plan = resolvePassPlan(pass);
-              const accessExpired = isPassAccessExpired(pass);
+              const fromCard = plan === "course" || pass.passKind === "course";
+              const courseStart = fromCard
+                ? activity
+                  ? activity.courseStartsOn
+                  : pass.startsAt
+                : pass.startsAt;
+              const courseEnd = fromCard
+                ? activity
+                  ? activity.courseEndsOn
+                  : pass.endsAt
+                : pass.endsAt;
+              const accessExpired = fromCard
+                ? pass.status === "expired" || isPastEndDate(courseEnd)
+                : isPassAccessExpired(pass);
               const showRenew = plan !== "course" && plan !== "none" && canRenewPass(pass);
               const statusLabel =
                 pass.status === "expired" || accessExpired
@@ -323,18 +346,22 @@ export function AccountPage() {
                       {activity?.age ? ` · ${activity.age}` : ""}
                     </p>
                     {plan === "course" || pass.passKind === "course" ? (
-                      <dl className="pass-counts">
+                      <dl className="pass-counts pass-counts-course">
                         <div>
                           <dt>Bambino</dt>
                           <dd>{pass.participantName || "Da associare"}</dd>
                         </div>
                         <div>
+                          <dt>Incontri</dt>
+                          <dd>{formatMeetingCount(activity?.sessions)}</dd>
+                        </div>
+                        <div>
                           <dt>Inizio</dt>
-                          <dd>{pass.startsAt ? formatCourseDay(pass.startsAt) : "—"}</dd>
+                          <dd>{courseStart ? formatCourseDay(courseStart) : "Da definire"}</dd>
                         </div>
                         <div className="is-left">
                           <dt>Fine</dt>
-                          <dd>{pass.endsAt ? formatCourseDay(pass.endsAt) : "—"}</dd>
+                          <dd>{courseEnd ? formatCourseDay(courseEnd) : "Da definire"}</dd>
                         </div>
                       </dl>
                     ) : plan === "monthly" ? (

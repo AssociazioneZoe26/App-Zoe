@@ -29,6 +29,13 @@ export function formatCourseDay(value: string | null | undefined) {
   });
 }
 
+export function formatMeetingCount(value: string | null | undefined) {
+  const digits = value?.match(/\d+/)?.[0];
+  if (!digits) return "Da definire";
+  const count = Number(digits);
+  return count === 1 ? "1 incontro" : `${count} incontri`;
+}
+
 /** Mezzogiorno UTC, così la data di calendario non slitta di fuso. */
 export function courseDateToTimestamp(value: string) {
   return `${dateOnly(value)}T12:00:00.000Z`;
