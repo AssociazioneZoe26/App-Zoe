@@ -3341,6 +3341,45 @@ h2 {
   padding: 36px 0 56px;
 }
 
+.admin-back {
+  margin: 0 0 16px;
+}
+
+.admin-back a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  color: var(--blue-deep);
+  text-decoration: none;
+}
+
+.admin-back-arrow {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--blue);
+  color: white;
+}
+
+.admin-back-arrow svg {
+  width: 22px;
+  height: 22px;
+}
+
+.admin-back a:hover .admin-back-arrow {
+  background: var(--sun);
+  color: var(--blue-deep);
+}
+
+.admin-back a:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
 .admin-login-shell {
   display: grid;
   place-items: center;
