@@ -191,7 +191,6 @@ export function ActivityPage() {
   }
 
   const isDatedCourse = activity.online || (activity.category === "Corso" && !activity.workshop);
-  const when = [activity.schedule, activity.time].filter(Boolean).join(" · ");
   const isMember = ready && Boolean(session) && session?.memberStatus === "approved";
   const offer = activityOffer(activity);
   const packsOnCard = offer === "packs" || offer === "pack4" || offer === "pack8";
@@ -352,12 +351,22 @@ export function ActivityPage() {
                     </div>
                   ) : null}
                 </>
-              ) : when ? (
-                <div>
-                  <dt>Quando</dt>
-                  <dd>{when}</dd>
-                </div>
-              ) : null}
+              ) : (
+                <>
+                  {activity.schedule ? (
+                    <div>
+                      <dt>Data</dt>
+                      <dd>{activity.schedule}</dd>
+                    </div>
+                  ) : null}
+                  {activity.time ? (
+                    <div>
+                      <dt>Orario</dt>
+                      <dd>{activity.time}</dd>
+                    </div>
+                  ) : null}
+                </>
+              )}
               {activity.online ? (
                 <div>
                   <dt>Lezioni</dt>

@@ -512,7 +512,7 @@ export function AdminProductFormPage() {
 
         <fieldset>
           <legend>
-            {isCourseKind ? "Dettagli (Età, Inizio, Fine…)" : "Dettagli (Età, Tipo, Quando…)"}
+            {isCourseKind ? "Dettagli (Età, Inizio, Fine…)" : "Dettagli (Età, Tipo, Data…)"}
           </legend>
           <div className="admin-form-row">
             <label>
@@ -559,8 +559,8 @@ export function AdminProductFormPage() {
               </div>
               <p className="admin-form-note">
                 Il corso ha un inizio e una fine. Dal giorno dopo la data di fine risulta scaduto
-                per il bambino a cui è associato. «Quando» resta solo per i laboratori, per esempio
-                tutti i sabati.
+                per il bambino a cui è associato. Data e orario restano due campi distinti sui
+                laboratori.
               </p>
               {form.kind === "corso" ? (
                 <div className="admin-form-row">
@@ -589,11 +589,11 @@ export function AdminProductFormPage() {
           ) : (
             <div className="admin-form-row">
               <label>
-                Quando
+                Data
                 <input
                   value={form.schedule}
                   onChange={(event) => update("schedule", event.target.value)}
-                  placeholder="Es. Tutti i sabati"
+                  placeholder="Es. Novembre 2026"
                 />
               </label>
               <label>

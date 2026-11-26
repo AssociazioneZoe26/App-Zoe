@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
+import { menuTone, navMenu } from "../admin/adminMenu";
 import { useAdminAuth } from "../admin/AuthContext";
 import { syncAllLocalToCloud } from "../lib/cloudSync";
 import { SiteFooter } from "./SiteFooter";
@@ -43,12 +44,14 @@ export function AdminLayout() {
           </div>
 
           <nav className="admin-nav admin-nav-desktop" aria-label="Admin">
-            <NavLink to="/admin/registrazioni">Registrazioni</NavLink>
-            <NavLink to="/admin/newsletter">Newsletter</NavLink>
-            <NavLink to="/admin/catalogo">Catalogo</NavLink>
-            <NavLink to="/admin/attivazioni">Attivazioni</NavLink>
-            <NavLink to="/admin/ingressi">Ingressi</NavLink>
-            <NavLink to="/admin/ingressi/scansiona">Scansiona ingresso</NavLink>
+            {navMenu.map((item) => (
+              <NavLink key={item.id} to={item.href} end={item.end} style={menuTone(item)}>
+                <span className="admin-nav-glyph" aria-hidden="true">
+                  {item.icon}
+                </span>
+                {item.navLabel || item.label}
+              </NavLink>
+            ))}
           </nav>
 
           <div className="admin-user">
@@ -87,15 +90,31 @@ export function AdminLayout() {
           aria-label="Menu admin"
           hidden={!open}
         >
-          <NavLink to="/admin" end>
+          <NavLink
+            to="/admin"
+            end
+            style={menuTone({ color: "#142c86", ink: "#fffdf9" })}
+          >
+            <span className="admin-nav-glyph" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M4 11.2 12 4.5l8 6.7V19a1.5 1.5 0 0 1-1.5 1.5H15v-5.2H9V20.5H5.5A1.5 1.5 0 0 1 4 19z"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
             Dashboard
           </NavLink>
-          <NavLink to="/admin/registrazioni">Registrazioni</NavLink>
-          <NavLink to="/admin/newsletter">Newsletter</NavLink>
-          <NavLink to="/admin/catalogo">Catalogo</NavLink>
-          <NavLink to="/admin/attivazioni">Attivazioni</NavLink>
-          <NavLink to="/admin/ingressi">Ingressi</NavLink>
-          <NavLink to="/admin/ingressi/scansiona">Scansiona ingresso</NavLink>
+          {navMenu.map((item) => (
+            <NavLink key={item.id} to={item.href} end={item.end} style={menuTone(item)}>
+              <span className="admin-nav-glyph" aria-hidden="true">
+                {item.icon}
+              </span>
+              {item.navLabel || item.label}
+            </NavLink>
+          ))}
         </nav>
       </header>
       <main className="admin-main">

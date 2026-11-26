@@ -3497,6 +3497,75 @@ h2 {
   margin: 4px 0 10px;
 }
 
+.admin-dash {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.admin-dash-card {
+  --menu-color: var(--blue);
+  --menu-ink: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  background: white;
+  border: 3px solid var(--menu-color);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.admin-dash-card:hover {
+  transform: translateY(-2px);
+}
+
+.admin-dash-card:focus-visible {
+  outline: 3px solid var(--menu-color);
+  outline-offset: 3px;
+}
+
+.admin-dash-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: var(--menu-color);
+  color: var(--menu-ink);
+}
+
+.admin-dash-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.admin-dash-card h2 {
+  margin: 4px 0 0;
+  color: var(--blue-deep);
+  font-size: 1.15rem;
+}
+
+.admin-dash-card p {
+  margin: 0;
+  flex: 1;
+}
+
+.admin-dash-go {
+  margin-top: 8px;
+  background: var(--menu-color);
+  color: var(--menu-ink);
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 8px 14px;
+}
+
 .admin-cards {
   list-style: none;
   margin: 28px 0 0;
@@ -3540,28 +3609,69 @@ h2 {
 
 .admin-nav {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 6px 12px;
+  justify-content: flex-end;
+  gap: 6px;
   margin-left: auto;
-  margin-right: 12px;
+  margin-right: 8px;
   flex: 1 1 auto;
   min-width: 0;
 }
 
-.admin-nav a {
+.admin-nav a,
+.admin-nav-mobile a {
+  --menu-color: var(--blue);
+  --menu-ink: var(--white);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 3px;
+  border-radius: 999px;
+  background: white;
   color: var(--blue-deep);
   font-weight: 800;
   text-decoration: none;
-  font-size: 0.86rem;
+  font-size: 0.82rem;
+  line-height: 1.1;
   white-space: nowrap;
+  border: 2px solid color-mix(in srgb, var(--menu-color) 70%, white);
 }
 
-.admin-nav a.active {
-  color: var(--red);
-  text-decoration: underline;
-  text-underline-offset: 4px;
+.admin-nav-glyph {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: var(--menu-color);
+  color: var(--menu-ink);
+}
+
+.admin-nav-glyph svg {
+  width: 15px;
+  height: 15px;
+}
+
+.admin-nav a.active,
+.admin-nav-mobile a.active {
+  background: var(--menu-color);
+  color: var(--menu-ink);
+  border-color: var(--menu-color);
+  text-decoration: none;
+}
+
+.admin-nav a.active .admin-nav-glyph,
+.admin-nav-mobile a.active .admin-nav-glyph {
+  background: white;
+  color: var(--menu-color);
+}
+
+.admin-nav a:focus-visible,
+.admin-nav-mobile a:focus-visible {
+  outline: 3px solid var(--blue-deep);
+  outline-offset: 2px;
 }
 
 @media (max-width: 1024px) {
@@ -3635,16 +3745,18 @@ h2 {
   }
 
   .admin-nav-mobile a {
-    color: var(--blue-deep);
-    font-weight: 800;
-    text-decoration: none;
-    font-size: 1.1rem;
-    padding: 12px 4px;
-    text-align: left;
+    font-size: 1rem;
+    padding: 6px 12px 6px 6px;
   }
 
-  .admin-nav-mobile a.active {
-    color: var(--red);
+  .admin-nav-mobile .admin-nav-glyph {
+    width: 34px;
+    height: 34px;
+  }
+
+  .admin-nav-mobile .admin-nav-glyph svg {
+    width: 18px;
+    height: 18px;
   }
 }
 
@@ -4122,6 +4234,7 @@ h2 {
 }
 
 @media (min-width: 760px) {
+  .admin-dash,
   .admin-cards {
     grid-template-columns: repeat(3, 1fr);
   }
