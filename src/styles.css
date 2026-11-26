@@ -4051,6 +4051,191 @@ h2 {
   background: rgba(27, 69, 214, 0.08);
 }
 
+.admin-newsletter-generated {
+  display: grid;
+  gap: 6px;
+  font-weight: 800;
+  color: var(--blue-deep);
+}
+
+.admin-newsletter-generated small {
+  font-weight: 700;
+  color: rgba(20, 40, 92, 0.72);
+}
+
+.admin-newsletter-generated textarea,
+.admin-newsletter-compose textarea {
+  width: 100%;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--ink);
+  background: var(--white);
+  resize: vertical;
+}
+
+.admin-newsletter-generated textarea {
+  background: #fffdf4;
+}
+
+.admin-newsletter-generated textarea:focus,
+.admin-newsletter-compose textarea:focus {
+  outline: 3px solid var(--sun);
+  border-color: var(--blue);
+}
+
+.admin-newsletter-hint {
+  margin: 0;
+  color: rgba(20, 40, 92, 0.78);
+}
+
+.admin-newsletter-compose {
+  margin-top: 0;
+}
+
+.admin-newsletter-material {
+  border: 2px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  margin: 0;
+  display: grid;
+  gap: 14px;
+  background: white;
+}
+
+.admin-newsletter-material legend {
+  padding: 0 8px;
+  font-weight: 800;
+  color: var(--blue-deep);
+}
+
+.admin-newsletter-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-newsletter-choice label,
+.admin-newsletter-picks label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: #fffdf9;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-newsletter-choice input,
+.admin-newsletter-picks input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--blue);
+}
+
+.admin-newsletter-picks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.admin-newsletter-picks label img,
+.admin-newsletter-picks .admin-newsletter-locandina {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex: 0 0 auto;
+}
+
+.admin-newsletter-picks label span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.admin-newsletter-picks small {
+  font-weight: 600;
+  color: rgba(20, 40, 92, 0.7);
+}
+
+.admin-newsletter-uploads ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.admin-newsletter-uploads li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-newsletter-uploads img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+}
+
+.admin-newsletter-uploads button {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  color: var(--red);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.admin-newsletter-file input {
+  font-weight: 600;
+}
+
+.admin-newsletter-issue {
+  align-items: flex-start;
+}
+
+.admin-newsletter-issue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-newsletter-issue-actions .admin-submit,
+.admin-newsletter-issue-actions .admin-secondary {
+  margin-top: 0;
+  width: fit-content;
+  cursor: pointer;
+}
+
+.admin-newsletter-issue-actions .admin-secondary {
+  background: white;
+  border: 2px solid var(--blue);
+  color: var(--blue-deep);
+  font: inherit;
+  font-weight: 800;
+  padding: 12px 16px;
+  border-radius: 12px;
+}
+
+.admin-newsletter-issue-actions .admin-secondary:hover:not(:disabled) {
+  background: var(--sun);
+}
+
 @media (max-width: 800px) {
   .admin-newsletter-stats {
     grid-template-columns: 1fr;

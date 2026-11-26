@@ -126,6 +126,49 @@ function buildDigest(
   return { subject, text, html };
 }
 
+type SavedIssue = {
+  id: string;
+  subject: string;
+  html: string;
+  text_body: string;
+  status: string;
+};
+
+function letterFromIssue(
+  issue: SavedIssue,
+  opts?: { test?: boolean; greetingName?: string },
+) {
+  const greetingName = (opts?.greetingName || "").trim();
+  const greeting = greetingName ? `Ciao ${escapeHtml(greetingName)},` : "Ciao,";
+  const base = siteUrl();
+  const alreadyBranded = /<!doctype|<html/i.test(issue.html);
+  const text = [
+    ...(opts?.test ? ["TEST — questa email non è partita alla lista.", ""] : []),
+    greetingName ? `Ciao ${greetingName},` : "Ciao,",
+    "",
+    issue.text_body,
+  ].join("\n");
+  const html = alreadyBranded
+    ? issue.html
+    : zoeBrandedEmailHtml({
+        eyebrow: "Newsletter",
+        title: escapeHtml(issue.subject),
+        greeting,
+        body: "",
+        extraHtml: issue.html,
+        buttonUrl: `${base}/academy`,
+        buttonLabel: "Vedi Academy",
+        footnote: opts?.test
+          ? "Questa è una prova: non è partita alla lista iscritti."
+          : "Ricevi questa email perché sei iscritta/o alla newsletter Zoe.",
+      });
+  return {
+    subject: opts?.test ? `[Test] ${issue.subject}` : issue.subject,
+    text,
+    html,
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -153,13 +196,102 @@ Deno.serve(async (req) => {
       action?: string;
       send?: boolean;
       toEmail?: string;
+      issueId?: string;
     };
     const action =
       body.action === "save_draft"
         ? "save_draft"
         : body.action === "send_test"
           ? "send_test"
-          : "preview";
+          : body.action === "send_issue_test"
+            ? "send_issue_test"
+            : body.action === "send_issue"
+              ? "send_issue"
+              : "preview";
+
+    if (action === "send_issue_test" || action === "send_issue") {
+      const issueId = String(body.issueId ?? "").trim();
+      if (!issueId) return json({ error: "issue_required" }, 400);
+      if (!isMailReady()) return json({ error: "mail_not_configured" }, 503);
+
+      const { data: issue, error: issueError } = await service
+        .from("newsletter_issues")
+        .select("id, subject, html, text_body, status")
+        .eq("id", issueId)
+        .maybeSingle();
+      if (issueError || !issue) return json({ error: "issue_not_found" }, 404);
+      const saved = issue as SavedIssue;
+
+      if (action === "send_issue_test") {
+        const toEmail = String(body.toEmail ?? "").trim().toLowerCase();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(toEmail)) {
+          return json({ error: "email_required" }, 400);
+        }
+        const [{ data: subscriber }, { data: memberProfile }] = await Promise.all([
+          service.from("newsletter_subscribers").select("full_name").eq("email", toEmail).maybeSingle(),
+          service.from("profiles").select("full_name, first_name").eq("email", toEmail).maybeSingle(),
+        ]);
+        const greetingName = firstNameOf(
+          subscriber?.full_name || memberProfile?.full_name,
+          memberProfile?.first_name,
+        );
+        const letter = letterFromIssue(saved, { test: true, greetingName });
+        const sent = await sendZoeEmail({
+          toEmail,
+          toName: greetingName || toEmail,
+          subject: letter.subject,
+          text: letter.text,
+          html: letter.html,
+        });
+        if (!sent.ok) {
+          return json({ error: sent.error, detail: "detail" in sent ? sent.detail : undefined }, 503);
+        }
+        return json({ ok: true, action, toEmail, subject: saved.subject });
+      }
+
+      if (saved.status === "sent") return json({ error: "already_sent" }, 409);
+      const { data: recipients, error: listError } = await service
+        .from("newsletter_subscribers")
+        .select("email, full_name")
+        .not("confirmed_at", "is", null)
+        .is("unsubscribed_at", null);
+      if (listError) return json({ error: "list_failed" }, 500);
+      const list = recipients ?? [];
+      if (list.length === 0) return json({ error: "no_recipients" }, 400);
+
+      let sentCount = 0;
+      const failed: string[] = [];
+      for (const row of list) {
+        const letter = letterFromIssue(saved, { greetingName: firstNameOf(row.full_name) });
+        const sent = await sendZoeEmail({
+          toEmail: row.email,
+          toName: row.full_name,
+          subject: letter.subject,
+          text: letter.text,
+          html: letter.html,
+        });
+        if (sent.ok) sentCount += 1;
+        else failed.push(row.email);
+      }
+      if (sentCount === 0) return json({ error: "send_failed", failed }, 503);
+
+      await service
+        .from("newsletter_issues")
+        .update({
+          status: "sent",
+          sent_at: new Date().toISOString(),
+          recipient_count: sentCount,
+        })
+        .eq("id", saved.id);
+
+      return json({
+        ok: true,
+        action,
+        subject: saved.subject,
+        sentCount,
+        failed,
+      });
+    }
     const { periodStart, periodEnd } = periodWindow();
 
     const { data: products } = await service
