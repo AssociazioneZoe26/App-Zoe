@@ -38,25 +38,12 @@ export function AdminLayout() {
     <div className="admin-shell">
       <header className="admin-top">
         <div className="admin-top-inner">
-          {onDashboardHome ? null : (
-            <Link className="admin-back" to="/admin" aria-label="Torna alla dashboard">
-              <span className="admin-back-arrow" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M14.5 6.5 8.5 12l6 5.5"
-                    stroke="currentColor"
-                    strokeWidth="2.4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-              <span className="admin-back-label">Dashboard</span>
-            </Link>
-          )}
           <div className="brand-pair admin-brand-pair">
             <Link to="/" className="brand brand-zoe" aria-label="Zoe, vai al sito">
               <img src="/brand/zoe-logo.png" alt="Zoe" />
+            </Link>
+            <Link to="/academy" className="brand brand-academy" aria-label="Zoe Academy">
+              <img src="/brand/academy-emblem.png" alt="" />
             </Link>
           </div>
 
@@ -72,14 +59,6 @@ export function AdminLayout() {
           </nav>
 
           <div className="admin-user">
-            <Link className="admin-text-link admin-academy-link" to="/academy" aria-label="Zoe Academy">
-              <span className="admin-academy-link-text">Zoe Academy</span>
-              <img
-                className="admin-academy-link-logo"
-                src="/brand/academy-emblem.png"
-                alt=""
-              />
-            </Link>
             <Link className="admin-dashboard-link" to="/admin">
               Dashboard
             </Link>
@@ -135,6 +114,22 @@ export function AdminLayout() {
         </nav>
       </header>
       <main className="admin-main">
+        {onDashboardHome ? null : (
+          <Link className="admin-back" to="/admin">
+            <span className="admin-back-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M14.5 6.5 8.5 12l6 5.5"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+            Dashboard
+          </Link>
+        )}
         <Outlet />
       </main>
 
