@@ -3342,16 +3342,18 @@ h2 {
 }
 
 .admin-back {
-  margin: 0 0 16px;
-}
-
-.admin-back a {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-shrink: 0;
+  margin: 0;
   font-weight: 800;
   color: var(--blue-deep);
   text-decoration: none;
+}
+
+.admin-back-label {
+  line-height: 1;
 }
 
 .admin-back-arrow {
@@ -3369,13 +3371,13 @@ h2 {
   height: 22px;
 }
 
-.admin-back a:hover .admin-back-arrow {
-  background: var(--sun);
+.admin-back:hover .admin-back-arrow {
+  background: white;
   color: var(--blue-deep);
 }
 
-.admin-back a:focus-visible {
-  outline: 3px solid var(--sun);
+.admin-back:focus-visible {
+  outline: 3px solid var(--blue-deep);
   outline-offset: 3px;
   border-radius: 999px;
 }
@@ -3722,6 +3724,11 @@ h2 {
   }
 
   .admin-nav-desktop {
+    display: none;
+  }
+
+  .admin-back-label,
+  .admin-top-inner:has(.admin-back) .admin-dashboard-link {
     display: none;
   }
 
